@@ -1,6 +1,6 @@
 'use strict';
 
-const {ZwaveDevice} = require('homey-meshdriver');
+const {ZwaveDevice} = require('homey-zwavedriver');
 
 const STATE_OPEN = 'open';
 const STATE_CLOSED = 'closed';
@@ -32,12 +32,9 @@ const OBSTACLE_SOURCE = {
 
 class BusT4Device extends ZwaveDevice {
 
-    async onMeshInit() {
+    async onNodeInit(node) {
         this.log('BusT4Device has been inited');
         this.enableDebug();
-
-        // SDKv2 (will be removed in v3)
-        this.driver = this.getDriver();
 
         // Open/close the gate
         this.registerCapability('onoff', 'SWITCH_MULTILEVEL', {
@@ -67,6 +64,7 @@ class BusT4Device extends ZwaveDevice {
     /**
      * Set state capability and trigger flows
      * @param {string} state
+     * @param {boolean} silent
      */
     setState(state, silent = false) {
         // State is same, as what we want set
@@ -85,13 +83,14 @@ class BusT4Device extends ZwaveDevice {
 
         // If no silent mode for init, trigger
         if (!silent) {
-            this.driver.stateChangedTrigger.trigger(this, {state: state});
+            this.getDriver().stateChangedTrigger.trigger(this, {state: state});
         }
     }
 
     /**
      * Set notification capability and trigger flows
      * @param {string|null} notification
+     * @param {boolean} silent
      */
     setNotification(notification, silent = false) {
         // Notification is already there
@@ -105,7 +104,7 @@ class BusT4Device extends ZwaveDevice {
 
         // If notification is set, and no silent mode for init, trigger
         if (notification !== null && !silent) {
-            this.driver.notificationReceivedTrigger.trigger(this, {notification: notification});
+            this.getDriver().notificationReceivedTrigger.trigger(this, {notification: notification});
         }
     }
 
